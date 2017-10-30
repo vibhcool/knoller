@@ -13,7 +13,7 @@ def refine_urls(url_list, related_word):
     train_sets=[({'wikipedia':True},'req'),({'blog':True},'req'),({'blogspot':True},'req'),({'wiki':True,},'req'),({'facebook':False,'yahoo':False,'gnome':False},'notreq')]
     print(train_sets)
     unsense={'facebook':False,'yahoo':False,'gnome':False}
-    classifier = nltk.NaiveBayesClassifier.train(train_sets,)
+    classifier = nltk.NaiveBayesClassifier.train(train_sets)
     for url in url_list:
         if classifier.classify({url:True}):
             print(classifier.classify({url:True}))

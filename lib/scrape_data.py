@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 
 def crawl_urls(url_list, content_type):
@@ -36,11 +37,12 @@ def get_text(soup):
         text_list.append(para)
     return text_list
 
-def get_links(soup):
-    a_list = soup.findAll('a')
+def get_links(r_html):
+    soup = BeautifulSoup(r_html,'html5lib')
+    a_list = soup.find_all('a')
     link_list = []
     for a in a_list:
-        print(a['href'])
+        #print(a['href'])
         link_list.append(a['href'])
     return link_list
 
@@ -58,29 +60,34 @@ def get_videos(soup):
     pass
 
 def get_urls(search_word):
-    url = 'https://www.google.co.in/search?q=car&start='
+    url = 'https://www.google.co.in/search?q=' + search_word + '&start='
     # fetching links from 10 google pages i.e. 100 links
+    urls = []
     for i in range(10):
-        page_url = url + str(i) + '0'
-        r_html=get_html(page_url)
-        soup = BeautifulSoup(r_html,'html5lib')
-        url_list = get_links(soup)
-        for i in range(0, len(url_list)):
-            if not url_correct(url_list[i]):
-                url_list.pop(i)
-            #else:
-            #    url_list[i] = fetch_url(url)
-    return url_list
+        page_url = url + str(i)
+        r_html = get_html(page_url)
+        url_list = re.findall(r'https?:\/\/[a-z0-9]{0,10}\.?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*', r_html)
+        print('hey1', len(url_list))
+        url_list = clean_urls(url_list)
+        urls = url_list + urls
+        print('hey2', len(url_list))
+        #url_list = clean_urls(url_list)
+    #print(len(urls))
+    return urls
+
+def clean_urls(url_list):
+    k_urls = []
+    for url in url_list:
+        if url_correct(url):
+            k_urls.append(url)
+    return k_urls
 
 def url_correct(url):
     if url == None:
         return False
-    if url.find('www.google.co') == -1:
+    if 'www.google.co' in url:
         return False
-    #if url.find('/url?sa=') == -1:
+    #if '/url?q=' = url[:7]:
     #    return False
     return True
 
-# If url isn't fetched properly
-def fetch_url(url):
-    return url[url.index('/url?sa=') + len('/url?sa='):]

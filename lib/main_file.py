@@ -1,5 +1,5 @@
-import scrape_data
-import refine_data
+#from ..scrape_data import *#scrape_data
+#from ..lib import refine_data
 
 # Main method
 def extract_data(search_word, related_word=None, content_type=None):

@@ -10,7 +10,7 @@ def refine_urls(url_list, related_word):
 
 
 
-'
+
 #TODO: Apply nlp and trained data to check it's relation from topics like tech, sports, etc
 def select_imp_data(data_list, related_word):
 	featureset = []

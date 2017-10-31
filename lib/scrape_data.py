@@ -14,9 +14,9 @@ def crawl_url(url, content_type='text'):
     soup = BeautifulSoup(r_html,'html5lib')
     data_dict = {}
     if content_type in ['text', 'all']:
-        data_dict['text'] = get_text(soup)
-    if content_type in ['link', 'all']:
-        data_dict['link'] = get_links(soup)
+        data_dict['text'] = get_text(r_html)
+    #if content_type in ['link', 'all']:
+        #data_dict['link'] = get_links(r_html)
     if content_type in ['image', 'all']:
         data_dict['image'] = get_images(soup)
     if content_type == 'video':
@@ -28,24 +28,69 @@ def get_html(url):
     r = requests.get(url)
     return r.text
 
-# apply Boilerpipe article extractor to improve this
-def get_text(soup):
-    para_list = soup.findAll('p', text=True)
-    text_list = []
-    for para in para_list:
-        print(para)
-        text_list.append(para)
-    return text_list
+# apply Boilerpipe article extractor to improve this. This fails if html is shitty
+def get_text(r_html):
+    data_tokens = r_html.split()
+    data_list = []
+    start = 0
+    html_size = len(data_tokens)
+    i = 0
+    for start in range(html_size):
+        check_head_start = (
+                '<h1' in data_tokens[start]
+                or '<h2' in data_tokens[start]
+                or '<h3' in data_tokens[start]
+                or '<h4' in data_tokens[start]
+                or '<h5' in data_tokens[start]
+                or '<h6' in data_tokens[start]
+        )
+        if check_head_start:
+            i = start
+            check_head_end = (
+                    '</h1>' in data_tokens[i]
+                    or '</h2>' in data_tokens[i]
+                    or '</h3>' in data_tokens[i]
+                    or '</h4>' in data_tokens[i]
+                    or '</h5>' in data_tokens[i]
+                    or '</h6>' in data_tokens[i]
+            )
+            while not check_head_end:
+                i += 1
+                if i >= len(data_tokens):
+                    break
+                check_head_end = (
+                    '</h1>' in data_tokens[i]
+                    or '</h2>' in data_tokens[i]
+                    or '</h3>' in data_tokens[i]
+                    or '</h4>' in data_tokens[i]
+                    or '</h5>' in data_tokens[i]
+                    or '</h6>' in data_tokens[i]
+                )
 
-def get_links(r_html):
-    soup = BeautifulSoup(r_html,'html5lib')
-    a_list = soup.find_all('a')
-    link_list = []
-    for a in a_list:
-        #print(a['href'])
-        link_list.append(a['href'])
+            data_list.append(' '.join(data_tokens[start:i+1]))
+            start = i
+
+        if i >= len(data_tokens):
+            break
+
+        if '<p ' in data_tokens[start] or '<p>' in data_tokens[start]:
+            i = start
+            while '</p>' not in data_tokens[i]:
+                i += 1
+                if i >= len(data_tokens):
+                    break
+       
+            data_list.append(' '.join(data_tokens[start:i+1]))
+            start = i
+        start += 1
+    print(data_list)
+    return data_list
+
+def get_links(r_html, url=None):
+    if url != None:
+        print('hey')
+    link_list = re.findall(r'(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*', r_html)
     return link_list
-
 
 def get_images(soup):
     a_list = soup.findAll('img')

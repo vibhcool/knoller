@@ -83,12 +83,12 @@ def get_text(r_html):
             data_list.append(' '.join(data_tokens[start:i+1]))
             start = i
         start += 1
-    print(data_list)
+    #print(data_list)
     return data_list
 
 def get_links(r_html, url=None):
     if url != None:
-        print('hey')
+        #print('hey')
     link_list = re.findall(r'(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*', r_html)
     return link_list
 
@@ -96,7 +96,7 @@ def get_images(soup):
     a_list = soup.findAll('img')
     link_list = []
     for a in a_list:
-        print(a['src'])
+        #print(a['src'])
         link_list.append(a['src'])
     return link_list
 
@@ -112,10 +112,10 @@ def get_urls(search_word):
         page_url = url + str(i)
         r_html = get_html(page_url)
         url_list = re.findall(r'https?:\/\/[a-z0-9]{0,10}\.?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*', r_html)
-        print('hey1', len(url_list))
+        #print('hey1', len(url_list))
         url_list = clean_urls(url_list)
         urls = url_list + urls
-        print('hey2', len(url_list))
+        #print('hey2', len(url_list))
         #url_list = clean_urls(url_list)
     #print(len(urls))
     return urls

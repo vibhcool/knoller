@@ -9,7 +9,9 @@ def crawl_urls(url_list, content_type):
         crawl_url(url, dict_data, content_type)
     return dict_data
 
-def crawl_url(url, dict_data, content_type='text'):
+def crawl_url(url, dict_data=None, content_type='text'):
+    if dict_data == None:
+        dict_data = {}
 
     r_html=get_html(url)
     soup = BeautifulSoup(r_html,'html5lib')

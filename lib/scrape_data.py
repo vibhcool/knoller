@@ -4,24 +4,25 @@ import re
 
 
 def crawl_urls(url_list, content_type):
-    dict_list = []
+    dict_data = {}
     for url in url_list:
-        dict_list.append(crawl_url(url, content_type))
+        crawl_url(url, dict_data, content_type)
+    return dict_data
 
-def crawl_url(url, content_type='text'):
+def crawl_url(url, dict_data=None, content_type='text'):
+    if dict_data == None:
+        dict_data = {}
 
     r_html=get_html(url)
     soup = BeautifulSoup(r_html,'html5lib')
-    data_dict = {}
     if content_type in ['text', 'all']:
-        data_dict['text'] = get_text(r_html)
+        dict_data['text'] = get_text_data(r_html)
     #if content_type in ['link', 'all']:
         #data_dict['link'] = get_links(r_html)
-    if content_type in ['image', 'all']:
-        data_dict['image'] = get_images(soup)
-    if content_type == 'video':
-        data_dict['video'] = get_videos(soup)
-    return data_dict
+    #if content_type in ['image', 'all']:
+    #    data_dict['image'] = get_images(soup)
+    #if content_type == 'video':
+    #    data_dict['video'] = get_videos(soup)
 
 def get_html(url):
     #url = 'https://en.wikipedia.org/wiki/Car'
@@ -29,7 +30,7 @@ def get_html(url):
     return r.text
 
 # apply Boilerpipe article extractor to improve this. This fails if html is shitty
-def get_text(r_html):
+def get_text_data(r_html):
     data_tokens = r_html.split()
     data_list = []
     start = 0
@@ -83,16 +84,22 @@ def get_text(r_html):
             data_list.append(' '.join(data_tokens[start:i+1]))
             start = i
         start += 1
-    #print(data_list)
     return data_list
+
+def get_clean_data(data_list):
+    data = []
+    for html_text in data_list:
+        html_text = re.sub(r'<[^>]*>', '', html_text)
+        data.append(html_text)
+    return data
 
 def get_links(r_html, url=None):
     if url != None:
-        #print('hey')
+        print('hey')
     link_list = re.findall(r'(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*', r_html)
     return link_list
 
-def get_images(soup):
+def get_images(r_html):
     a_list = soup.findAll('img')
     link_list = []
     for a in a_list:

@@ -55,6 +55,9 @@ def get_text_data(r_html):
         )
         if check_head_start:
             i = start
+            if 'head' in data:
+                data_list.append(data)
+                data = {}
             check_head_end = (
                     '</h1>' in data_tokens[i]
                     or '</h2>' in data_tokens[i]
@@ -83,18 +86,18 @@ def get_text_data(r_html):
 
         if '<p ' in data_tokens[start] or '<p>' in data_tokens[start]:
             i = start
+            if 'para' not in data:
+                data['para'] = []
             while '</p>' not in data_tokens[i]:
                 i += 1
                 if i >= len(data_tokens):
                     break
-            data['para'] = get_clean_data(' '.join(data_tokens[start:i+1]))
+            data['para'].append(get_clean_data(' '.join(data_tokens[start:i+1])))
             
             start = i
         start += 1
-        if 'para' in data or 'head' in data:
-            data_list.append(data)
-            #print(data)
-            data = {}
+    if 'head' in data:
+        data_list.append(data)
     return data_list
 
 def get_clean_data(data):

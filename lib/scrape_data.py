@@ -1,22 +1,26 @@
 import requests
+from requests.exceptions import ConnectionError
 from bs4 import BeautifulSoup
 import re
 
 
 def crawl_urls(url_list, content_type):
     dict_data = {}
+    dict_data['text'] = []
+    i = 1
     for url in url_list:
-        crawl_url(url, dict_data, content_type)
+        print('crawling data for', i, 'url', url, '...')
+        crawl_url(url, dict_data, 'text')
     return dict_data
 
 def crawl_url(url, dict_data=None, content_type='text'):
-    if dict_data == None:
-        dict_data = {}
-
     r_html=get_html(url)
-    soup = BeautifulSoup(r_html,'html5lib')
+    #soup = BeautifulSoup(r_html,'html5lib')
     if content_type in ['text', 'all']:
-        dict_data['text'] = get_text_data(r_html)
+        data = get_text_data(r_html)
+        dict_data['text'] = dict_data['text'] + data
+        #print(data)
+        #print(len(dict_data['text']))
     #if content_type in ['link', 'all']:
         #data_dict['link'] = get_links(r_html)
     #if content_type in ['image', 'all']:
@@ -26,13 +30,17 @@ def crawl_url(url, dict_data=None, content_type='text'):
 
 def get_html(url):
     #url = 'https://en.wikipedia.org/wiki/Car'
-    r = requests.get(url)
+    try:
+        r = requests.get(url)
+    except ConnectionError:
+        print('Failed to open url.')
     return r.text
 
 # apply Boilerpipe article extractor to improve this. This fails if html is shitty
 def get_text_data(r_html):
     data_tokens = r_html.split()
     data_list = []
+    data = {}
     start = 0
     html_size = len(data_tokens)
     i = 0
@@ -67,8 +75,7 @@ def get_text_data(r_html):
                     or '</h5>' in data_tokens[i]
                     or '</h6>' in data_tokens[i]
                 )
-
-            data_list.append(' '.join(data_tokens[start:i+1]))
+            data['head'] = get_clean_data(' '.join(data_tokens[start:i+1]))
             start = i
 
         if i >= len(data_tokens):
@@ -80,17 +87,18 @@ def get_text_data(r_html):
                 i += 1
                 if i >= len(data_tokens):
                     break
-       
-            data_list.append(' '.join(data_tokens[start:i+1]))
+            data['para'] = get_clean_data(' '.join(data_tokens[start:i+1]))
+            
             start = i
         start += 1
+        if 'para' in data or 'head' in data:
+            data_list.append(data)
+            #print(data)
+            data = {}
     return data_list
 
-def get_clean_data(data_list):
-    data = []
-    for html_text in data_list:
-        html_text = re.sub(r'<[^>]*>', '', html_text)
-        data.append(html_text)
+def get_clean_data(data):
+    data = re.sub(r'<[^>]*>', '', data)
     return data
 
 def get_links(r_html, url=None):

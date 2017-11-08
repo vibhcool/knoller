@@ -1,5 +1,5 @@
-from lib import scrape_data
-from lib import refine_data
+import scrape_data
+import refine_data
 
 # Main method
 def extract_data(search_word, related_word=None, content_type=None):
@@ -23,8 +23,8 @@ def fetch_urls_list(search_word, related_word=None):
 def fetch_data(url_list, content_type, related_word):
     print('starts scraping data...')
     data_list = scrape_data.crawl_urls(url_list, content_type)
-    #imp_data = select_imp_data(data_list, related_word)
-    return data_list
+    imp_data = refine_data.select_imp_data(data_list, related_word=None,topic="tech")
+    return imp_data
 
 def output_data(data_dict):
     #TODO: code this method, output shall have images, text(text, reference

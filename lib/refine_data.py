@@ -47,6 +47,27 @@ def refine_urls(url_list, related_word):
 #     return req_data
     	
 def select_imp_data(data_list, related_word, topic):
-    with open('./classifier/classifier.pickle','rb') as fobj:
-        classifier= pickle.load(fobj)
+    fobj=open('./classifier/classifier.pickle','rb')
+    classifier= pickle.load(fobj)
+    fobj.close()
+    imp_data=[]
+    for req_data in data_list['text']:
+        for key,value in req_data.items():
+            if type(value) is list:
+                arr=[]
+                for par in value:
+                   if classifier.classify(featureset(par)) == topic:
+                      arr.append(par)
+                imp_data.append({key,arr})
+            else:
+                if classifier.classify(featureset(value)) == topic:
+                    imp_data.append({key,value})
+    return imp_data
+
+
+
+def featureset(s):
+    return {s:True}
+    
+    
     

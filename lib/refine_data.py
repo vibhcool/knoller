@@ -58,10 +58,10 @@ def select_imp_data(data_list, related_word, topic):
                 for par in value:
                    if classifier.classify(featureset(par)) == topic:
                       arr.append(par)
-                imp_data.append({key,arr})
+                imp_data.append({key:arr})
             else:
                 if classifier.classify(featureset(value)) == topic:
-                    imp_data.append({key,value})
+                    imp_data.append({key:value})
     return imp_data
 
 
